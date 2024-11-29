@@ -1,30 +1,47 @@
-import React,{useState} from 'react'
+import React,{useState,useContext } from 'react'
 import uber_logo from '../assets/Uber_logo.png'
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom'
+import { UserDataContext } from '../context/userContext'
+import axios from 'axios'
 
 const UserLogin = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  
-  const [userDate,setUserDate] = useState('')
+  const [ email, setEmail ] = useState('')
+  const [ password, setPassword ] = useState('')
+ 
 
-  const sumitHandler = (e) => {
-    e.preventDefault()
-    setUserDate({
-      email:email,
-      password:password,
-    })
-  
-    setEmail('');
-    setPassword('');
-    // call the backend API for login
+  const { user, setUser } = useContext(UserDataContext)
+  const navigate = useNavigate()
+
+
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+
+    const userData = {
+      email: email,
+      password: password
+    }
+
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData)
+
+    if (response.status === 200) {
+      const data = response.data
+      setUser(data.user)
+      localStorage.setItem('token', data.token)
+      navigate('/home')
+    }
+
+
+    setEmail('')
+    setPassword('')
   }
   return (
     <div className='p-7 flex flex-col h-screen justify-between '>
       <div>
       <img src={uber_logo} className='w-16 mb-8 ' alt="" />
       <form onSubmit={(e)=>{
-        sumitHandler(e)
+        submitHandler(e)
       }}>
         <h3 className='text-lg font-medium mb-2' > What's your Email</h3>
 
